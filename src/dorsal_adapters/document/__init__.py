@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dorsal_adapters.registry import get_adapter
+from dorsal_adapters.document.hocr_adapter import to_hocr
+from dorsal_adapters.document.md_adapter import from_md, to_md
+from dorsal_adapters.document.tsv_adapter import from_tsv, to_tsv
+from dorsal_adapters.document.txt_adapter import from_txt, to_txt
 
-__all__ = ["get_adapter"]
+__all__ = ["from_md", "from_tsv", "from_txt", "to_hocr", "to_md", "to_tsv", "to_txt"]

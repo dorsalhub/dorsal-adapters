@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dorsal_adapters.registry import get_adapter
+from dorsal_adapters.document.html_adapter.exporter import to_html
+from dorsal_adapters.document.html_adapter.parser import from_html
 
-__all__ = ["get_adapter"]
+__all__ = ["from_html", "to_html"]

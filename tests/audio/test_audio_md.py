@@ -32,15 +32,12 @@ VALID_MD = """# Transcription
 
 def test_time_helpers():
     """Test the internal time formatting and parsing utilities."""
-    # Test formatting with milliseconds
     assert _format_time(65.123, include_milliseconds=True) == "01:05.123"
     assert _format_time(3665.123, include_milliseconds=True) == "01:01:05.123"
 
-    # Test formatting without milliseconds
     assert _format_time(65.123, include_milliseconds=False) == "01:05"
     assert _format_time(3665.123, include_milliseconds=False) == "01:01:05"
 
-    # Test parsing
     assert _parse_time("01:05.123") == 65.123
     assert _parse_time("01:01:05.123") == 3665.123
     assert _parse_time("65.123") == 65.123
@@ -63,7 +60,7 @@ def test_to_md_no_segments(valid_audio_record):
     result = to_md(record, validate=False)
     assert "# Transcription" in result
     assert "Welcome back!" in result
-    assert "**[" not in result  # Timestamps shouldn't be rendered if segments are missing
+    assert "**[" not in result
 
 
 def test_to_md_options(valid_audio_record):

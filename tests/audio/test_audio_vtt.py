@@ -37,9 +37,8 @@ def test_to_vtt_conversion(valid_audio_record):
     assert "WEBVTT" in result
     assert "00:00:00.500 --> 00:00:04.750" in result
     assert "Welcome back!" in result
-    assert "<v" not in result  # Speakers shouldn't be included by default
+    assert "<v" not in result
 
-    # Ensure webvtt-py can parse our output
     assert len(webvtt.from_string(result)) == 5
 
 

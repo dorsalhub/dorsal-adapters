@@ -77,7 +77,6 @@ def to_md(
             if speaker_name:
                 line_parts.append(f"**{speaker_name}:**")
 
-        # Combine prefix elements and the text
         prefix = " ".join(line_parts)
         text = segment["text"].strip()
 
@@ -103,8 +102,6 @@ def from_md(
     segments = []
     full_text_blocks = []
 
-    # Regex to match: **[00:00 - 00:05]** **Speaker:** Text OR **[00:00 - 00:05]** Text
-    # It safely ignores the speaker part if it doesn't exist.
     pattern = re.compile(r"^\*\*\[([\d:]+)\s*-\s*([\d:]+)\]\*\*(?:\s*\*\*([^:]+):\*\*)?\s+(.*)", re.IGNORECASE)
 
     for line in md_content.splitlines():
@@ -123,8 +120,6 @@ def from_md(
             segments.append(segment)
             full_text_blocks.append(text.strip())
         else:
-            # If it doesn't match our strict timestamp format, treat the line as pure text without time data.
-            # We assign a default 0.0 time just to satisfy the schema requirement if segments are used.
             clean_text = line.replace("**", "").strip()
             segments.append({"start_time": 0.0, "end_time": 0.0, "text": clean_text})
             full_text_blocks.append(clean_text)

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dorsalhub-adapters"
-version = "0.1.0"
+version = "0.2.0"
 description = "Export validated JSON to standard formats."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -71,5 +71,6 @@ dev = [
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
     "ruff>=0.8.4",
-    "dorsalhub>=0.6.0",
+    "dorsalhub>=0.8.2",
+    "hocr-tools-lib>=1.2.0"
 ]

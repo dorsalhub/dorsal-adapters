@@ -65,7 +65,6 @@ def to_vtt(
             text=segment["text"].strip(),
         )
 
-        # Only inject the WebVTT speaker tags if the user explicitly asks for them
         if include_speakers:
             speaker = segment.get("speaker")
             if speaker and "name" in speaker:
@@ -95,7 +94,6 @@ def from_vtt(
         start_time = _vtt_time_to_seconds(caption.start)
         end_time = _vtt_time_to_seconds(caption.end)
 
-        # webvtt-py cleanly strips styling/voice tags from `caption.text` automatically
         text = caption.text.replace("\n", " ").strip()
 
         segments.append({"text": text, "start_time": start_time, "end_time": end_time})

@@ -1,9 +1,22 @@
+# Copyright 2026 Dorsal Hub LTD
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import io
 import pytest
 from dorsal_adapters.registry import Adapter, get_adapter, list_formats
 
 
-# --- Mock Functions for the Adapter Class ---
 def dummy_export(record: dict, **kwargs) -> str:
     return f"exported: {record.get('key')} extra={kwargs.get('extra')}"
 
@@ -19,12 +32,12 @@ def dummy_adapter() -> Adapter:
         schema_id="test/schema",
         format_name="test-fmt",
         description="A test adapter",
+        extension="text",
         export_fn=dummy_export,
         parse_fn=dummy_parse,
     )
 
 
-# --- Adapter Class Tests ---
 def test_adapter_export_dict(dummy_adapter):
     """Test exporting natively with a Python dictionary."""
     result = dummy_adapter.export({"key": "value"}, extra="yes")
@@ -80,7 +93,6 @@ def test_adapter_repr(dummy_adapter):
     assert repr(dummy_adapter) == "Adapter(schema_id='test/schema', format_name='test-fmt')"
 
 
-# --- Registry Function Tests ---
 def test_get_adapter_success():
     """Test successful dynamic loading of a registered adapter."""
     adapter = get_adapter("open/audio-transcription", "srt")
@@ -108,13 +120,11 @@ def test_list_formats():
     formats = list_formats("open/audio-transcription")
     assert len(formats) > 0
 
-    # Check that it returns expected tuples of (format_name, description)
     fmt_names = [f[0] for f in formats]
     assert "srt" in fmt_names
     assert "vtt" in fmt_names
     assert "tsv" in fmt_names
 
-    # Verify sorting logic
     assert fmt_names == sorted(fmt_names)
 
 

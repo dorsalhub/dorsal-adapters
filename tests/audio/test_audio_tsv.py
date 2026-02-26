@@ -16,7 +16,7 @@ import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
 from dorsal_adapters.audio.tsv_adapter import from_tsv, to_tsv
 
-# A slice of valid TSV data matching the audio-transcription-1.json record
+
 VALID_TSV = """start_time\tend_time\ttext
 0.500\t4.750\tWelcome back! Today, my guest is the renowned chef, Jean-Pierre.
 5.100\t8.250\tThank you, it's a pleasure. You know, the secret is simple,
@@ -33,7 +33,7 @@ def test_to_tsv_conversion(valid_audio_record):
     assert "start_time\tend_time\ttext" in result
     assert "0.500\t4.750\tWelcome back!" in result
     assert "12.000\t14.500\tIt's all about respecting the product." in result
-    assert "Maria" not in result  # Should not be included by default
+    assert "Maria" not in result
 
 
 def test_to_tsv_with_speakers(valid_audio_record):
