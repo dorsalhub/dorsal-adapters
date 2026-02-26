@@ -74,14 +74,14 @@ Outputs saved successfully:
   ↳ /home/user/sandbox/test.srt
 ```
 
-### Direct Use
+### Direct Usage
 
 Adapters are Python classes with methods for exporting to and parsing from the supported file formats:
 
 * `export(record)` / `export_file(record, fp)`: Converts a JSON record into a standard format.
 * `parse(content)` / `parse_file(fp)`: Best-effort conversion from a standard format back into a Dorsal JSON Record.
 
-### Example: Audio to Subtitles (SRT)
+#### Example: Audio to Subtitles (SRT)
 
 In this example, a valid [`open/audio-transcription`](https://docs.dorsalhub.com/reference/schemas/open/audio-transcription/) record is converted into a subtitle file.
 
