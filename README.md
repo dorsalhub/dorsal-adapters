@@ -24,7 +24,7 @@
 
 Currently supports two-way conversion (exporting and parsing) for the following domains and formats:
 
-### 📄 Document Extraction (`open/document-extraction`)
+### Document Extraction (`open/document-extraction`)
 Convert complex spatial bounding boxes, text blocks, and multi-polygons into layout-aware formats:
 * **`md`**: **RAG-Optimized Markdown** — Injects semantic headings, hallucination warnings, and visual placeholders directly into the text stream for LLM consumption.
 * **`html`**: **Semantic HTML (.html)** — Renders a responsive, visually inferred 2D DOM layout from raw spatial coordinates.
@@ -32,7 +32,7 @@ Convert complex spatial bounding boxes, text blocks, and multi-polygons into lay
 * **`tsv`**: **Tab-Separated Values** — Perfect for spreadsheet ingestion and tabular data analysis.
 * **`txt`**: **Plain Text** — Flattens the document layout into clean, stitched paragraphs.
 
-### 🎙️ Audio Transcription (`open/audio-transcription`)
+### Audio Transcription (`open/audio-transcription`)
 Convert rich transcription data (including speaker diarization, non-verbal events, and timestamps) into standard media formats:
 * **`srt`**: **SubRip Text (.srt)** — The most widely used plaintext subtitle format.
 * **`vtt`**: **WebVTT (.vtt)** — The W3C standard web subtitle format for HTML5 video players.
