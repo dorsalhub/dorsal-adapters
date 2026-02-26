@@ -20,8 +20,6 @@
 
 **Dorsal Adapters** translates [validated](https://github.com/dorsalhub/open-validation-schemas) JSON records into various industry-standard formats.
 
-Want to generate subtitles? Render semantic HTML from OCR geometry? Feed RAG-optimized Markdown into an LLM pipeline? Dorsal Adapters handles the conversion effortlessly.
-
 ## Supported Formats
 
 Currently supports two-way conversion (exporting and parsing) for the following domains and formats:
