@@ -1,6 +1,20 @@
+# Copyright 2026 Dorsal Hub LTD
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
-from dorsal_adapters.audio.txt import from_txt, to_txt
+from dorsal_adapters.audio.txt_adapter import from_txt, to_txt
 
 # A string matching the expected raw text extraction
 VALID_TXT = "Welcome back! Today, my guest is the renowned chef, Jean-Pierre. Thank you, it's a pleasure. You know, the secret is simple, c'est une question de respect pour le produit. It's all about respecting the product."

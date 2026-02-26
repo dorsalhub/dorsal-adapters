@@ -15,7 +15,7 @@
 import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
 import webvtt
-from dorsal_adapters.audio.vtt import from_vtt, to_vtt
+from dorsal_adapters.audio.vtt_adapter import from_vtt, to_vtt
 
 VALID_VTT = """WEBVTT
 

@@ -14,7 +14,7 @@
 
 import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
-from dorsal_adapters.audio.tsv import from_tsv, to_tsv
+from dorsal_adapters.audio.tsv_adapter import from_tsv, to_tsv
 
 # A slice of valid TSV data matching the audio-transcription-1.json record
 VALID_TSV = """start_time\tend_time\ttext
