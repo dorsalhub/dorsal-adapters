@@ -14,6 +14,7 @@
 
 from typing import Any
 from dorsal_adapters.common.validation import validate_record
+from dorsal_adapters.document.helpers import extract_spatial_pages
 
 
 def to_txt(
@@ -21,37 +22,45 @@ def to_txt(
     *,
     validate: bool = True,
     schema_version: str | None = None,
+    strict: bool = False,
+    **kwargs: Any,
 ) -> str:
-    """Egress: Extracts the raw text from an 'audio-transcription' record."""
+    """Egress: Extracts the raw text from a 'document-extraction' record."""
     if validate:
-        validate_record(record, schema_id="audio-transcription", version=schema_version)
+        validate_record(record, schema_id="document-extraction", version=schema_version)
 
-    # Prefer the concatenated text field if it exists
-    if "text" in record and record["text"].strip():
-        text: str = record["text"]
-        return text.strip()
+    if not record.get("blocks"):
+        raise ValueError("The provided record contains no 'blocks'.")
 
-    # Fallback to joining segments
-    segments = record.get("segments", [])
-    if not segments:
-        raise ValueError("The provided record contains no 'text' or 'segments'.")
+    pages = extract_spatial_pages(record, strict=strict, **kwargs)
+    output = []
 
-    return " ".join(segment["text"].strip() for segment in segments)
+    for i, (page_num, paragraphs) in enumerate(pages):
+        if i > 0:
+            output.append(f"--- Page {page_num} ---")
+
+        for para in paragraphs:
+            text = para.get("text", "").strip()
+            if text:
+                output.append(text)
+
+    return "\n\n".join(output)
 
 
 def from_txt(
     txt_content: str, producer: str = "txt-adapter", *, validate: bool = True, schema_version: str | None = None
 ) -> dict[str, Any]:
-    """Ingress: Wraps raw text into a valid 'audio-transcription' record."""
+    """Ingress: Wraps raw text into a valid 'document-extraction' record."""
     if not txt_content.strip():
         raise ValueError("Provided text content is empty.")
 
     record = {
         "producer": producer,
-        "text": txt_content.strip(),
+        "extraction_type": "text",
+        "blocks": [{"block_type": "text", "text": txt_content.strip()}],
     }
 
     if validate:
-        validate_record(record, schema_id="audio-transcription", version=schema_version)
+        validate_record(record, schema_id="document-extraction", version=schema_version)
 
     return record

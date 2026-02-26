@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dorsal_adapters.audio.md import from_md, to_md
-from dorsal_adapters.audio.srt import from_srt, to_srt
-from dorsal_adapters.audio.tsv import from_tsv, to_tsv
-from dorsal_adapters.audio.txt import from_txt, to_txt
-from dorsal_adapters.audio.vtt import from_vtt, to_vtt
+from dorsal_adapters.audio.md_adapter import from_md, to_md
+from dorsal_adapters.audio.srt_adapter import from_srt, to_srt
+from dorsal_adapters.audio.tsv_adapter import from_tsv, to_tsv
+from dorsal_adapters.audio.txt_adapter import from_txt, to_txt
+from dorsal_adapters.audio.vtt_adapter import from_vtt, to_vtt
 
 __all__ = ["from_md", "from_srt", "from_tsv", "from_txt", "from_vtt", "to_md", "to_srt", "to_tsv", "to_txt", "to_vtt"]

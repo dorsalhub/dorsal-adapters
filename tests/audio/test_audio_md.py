@@ -1,14 +1,35 @@
+# Copyright 2026 Dorsal Hub LTD
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
-from dorsal_adapters.audio.md import from_md, to_md, _format_time, _parse_time
+from dorsal_adapters.audio.md_adapter import from_md, to_md, _format_time, _parse_time
 
-VALID_MD = """# Transcription
+VALID_MD = """---
+producer: test-runner
+---
+
+# Transcription
 
 **[00:00 - 00:04]** Welcome back! Today, my guest is the renowned chef, Jean-Pierre.
 
+> *[applause, cheer]*
+
 **[00:05 - 00:08]** Thank you, it's a pleasure. You know, the secret is simple,
 
-**[00:08 - 00:10]** c'est une question de respect pour le produit.
+> ⚠️ **Low Confidence Read (0.45)**:
+> **[00:08 - 00:10]** c'est une question de respect pour le produit.
 
 **[00:11 - 00:11]** [laughter]
 
@@ -18,66 +39,81 @@ VALID_MD = """# Transcription
 
 def test_time_helpers():
     """Test the internal time formatting and parsing utilities."""
-    # Test formatting with milliseconds
     assert _format_time(65.123, include_milliseconds=True) == "01:05.123"
     assert _format_time(3665.123, include_milliseconds=True) == "01:01:05.123"
 
-    # Test formatting without milliseconds
     assert _format_time(65.123, include_milliseconds=False) == "01:05"
     assert _format_time(3665.123, include_milliseconds=False) == "01:01:05"
 
-    # Test parsing
     assert _parse_time("01:05.123") == 65.123
     assert _parse_time("01:01:05.123") == 3665.123
     assert _parse_time("65.123") == 65.123
 
 
-def test_to_md_conversion(valid_audio_record):
-    """Test standard egress from Open Schema to Markdown."""
-    result = to_md(valid_audio_record, validate=False)
+def test_to_md_rich_rag_features():
+    """Test all LLM-optimized enrichments: Frontmatter, Events, and Warnings."""
+    record = {
+        "producer": "test-runner",
+        "language": "eng",
+        "duration": 120.5,
+        "track_id": "CH1",
+        "attributes": {"domain": "medical"},
+        "segments": [
+            {"start_time": 0.0, "end_time": 5.0, "text": "Normal text.", "events": ["door closes", "footsteps"]},
+            {
+                "start_time": 5.0,
+                "end_time": 10.0,
+                "text": "Mumbled words",
+                "score": 0.45,
+                "speaker": {"id": "1", "name": "Dr. Smith"},
+            },
+            {"start_time": 10.0, "end_time": 15.0, "text": "", "events": ["silence"]},
+        ],
+    }
 
-    assert "# Transcription" in result
-    assert "**[00:00 - 00:04]** Welcome back!" in result
-    assert "**[00:12 - 00:14]** It's all about respecting the product." in result
+    res = to_md(record, validate=False, include_speakers=True)
+
+    assert "language: eng" in res
+    assert 'domain: "medical"' in res
+    assert "> *[door closes, footsteps]*" in res
+    assert "> ⚠️ **Low Confidence Read (0.45)**:\n> **[00:05 - 00:10]** **Dr. Smith:** Mumbled words" in res
+    assert "> *[silence]*" in res
+
+    no_fm = to_md(record, validate=False, include_frontmatter=False, include_timestamps=False, include_speakers=False)
+    assert "---" not in no_fm
+    assert "> ⚠️ **Low Confidence Read (0.45)**:\n> Mumbled words" in no_fm
 
 
 def test_to_md_no_segments(valid_audio_record):
-    """Test egress gracefully handles records with text but no segments."""
+    """Test egress gracefully handles records with text but no segments, respecting frontmatter."""
     record = valid_audio_record.copy()
     del record["segments"]
 
+    record["producer"] = "test-runner"
+
     result = to_md(record, validate=False)
+    assert "---" in result
+    assert "producer: test-runner" in result
     assert "# Transcription" in result
     assert "Welcome back!" in result
-    assert "**[" not in result  # Timestamps shouldn't be rendered if segments are missing
-
-
-def test_to_md_options(valid_audio_record):
-    """Test egress configuration flags (timestamps, speakers, ms)."""
-    result = to_md(
-        valid_audio_record, validate=False, include_timestamps=True, include_milliseconds=True, include_speakers=True
-    )
-    assert "**[00:00.500 - 00:04.750]** **Maria:** Welcome back!" in result
-
-
-def test_to_md_no_timestamps_no_speakers(valid_audio_record):
-    """Test egress without timestamps or speakers."""
-    result = to_md(valid_audio_record, validate=False, include_timestamps=False, include_speakers=False)
-    assert "Welcome back!" in result
     assert "**[" not in result
-    assert "**Maria:**" not in result
 
 
 def test_from_md_conversion():
-    """Test standard ingress from Markdown string to Open Schema record."""
+    """Test ingress from Markdown string to Open Schema record, validating blockquote stripping."""
     record = from_md(VALID_MD, producer="test-runner", validate=False)
 
     assert record["producer"] == "test-runner"
-    assert len(record["segments"]) == 5
+    assert len(record["segments"]) == 6
+
     assert record["segments"][0]["start_time"] == 0.0
     assert record["segments"][0]["end_time"] == 4.0
     assert record["segments"][0]["text"] == "Welcome back! Today, my guest is the renowned chef, Jean-Pierre."
-    assert "c'est une question de respect pour le produit." in record["text"]
+
+    assert record["segments"][1]["events"] == ["applause", "cheer"]
+    assert record["segments"][1]["text"] == ""
+
+    assert record["segments"][3]["text"] == "c'est une question de respect pour le produit."
 
 
 def test_from_md_with_speakers():

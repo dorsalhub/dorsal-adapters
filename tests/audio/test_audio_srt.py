@@ -15,7 +15,7 @@
 import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
 import srt
-from dorsal_adapters.audio.srt import from_srt, to_srt
+from dorsal_adapters.audio.srt_adapter import from_srt, to_srt
 
 
 VALID_SRT = """1

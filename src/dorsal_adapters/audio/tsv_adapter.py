@@ -79,7 +79,6 @@ def from_tsv(
             "text": text,
         }
 
-        # Optionally grab speaker if it exists in the ingress data
         if "speaker" in row and row["speaker"].strip():
             segment["speaker"] = {"id": row["speaker"].strip(), "name": row["speaker"].strip()}
 

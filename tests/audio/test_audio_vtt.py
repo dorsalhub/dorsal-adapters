@@ -15,7 +15,7 @@
 import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
 import webvtt
-from dorsal_adapters.audio.vtt import from_vtt, to_vtt
+from dorsal_adapters.audio.vtt_adapter import from_vtt, to_vtt
 
 VALID_VTT = """WEBVTT
 
@@ -37,9 +37,8 @@ def test_to_vtt_conversion(valid_audio_record):
     assert "WEBVTT" in result
     assert "00:00:00.500 --> 00:00:04.750" in result
     assert "Welcome back!" in result
-    assert "<v" not in result  # Speakers shouldn't be included by default
+    assert "<v" not in result
 
-    # Ensure webvtt-py can parse our output
     assert len(webvtt.from_string(result)) == 5
 
 

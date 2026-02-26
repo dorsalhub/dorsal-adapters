@@ -21,19 +21,21 @@ from typing import Any, Callable, IO
 class Adapter:
     """Convert between schema-validated records and specific formats."""
 
-    __slots__ = ("schema_id", "format_name", "description", "_export_fn", "_parse_fn")
+    __slots__ = ("schema_id", "format_name", "description", "extension", "_export_fn", "_parse_fn")
 
     def __init__(
         self,
         schema_id: str,
         format_name: str,
         description: str,
+        extension: str,
         export_fn: Callable[..., Any],
         parse_fn: Callable[..., dict[str, Any]],
     ) -> None:
         self.schema_id = schema_id
         self.format_name = format_name
         self.description = description
+        self.extension = extension
         self._export_fn = export_fn
         self._parse_fn = parse_fn
 
@@ -63,7 +65,6 @@ class Adapter:
         """
         Converts a Dorsal record and writes it directly to a file-like object.
         """
-        # We can safely pass the raw input to self.export, which handles the stringified JSON check
         fp.write(self.export(record, **kwargs))
 
     def parse_file(self, fp: IO[Any], **kwargs: Any) -> dict[str, Any]:
@@ -76,37 +77,82 @@ class Adapter:
         return f"Adapter(schema_id='{self.schema_id}', format_name='{self.format_name}')"
 
 
-_REGISTRY: dict[tuple[str, str], tuple[str, str, str, str]] = {
+_REGISTRY: dict[tuple[str, str], tuple[str, str, str, str, str]] = {
+    # audio-transcription
     ("open/audio-transcription", "srt"): (
         "SubRip Text (.srt) - A widely used, plaintext subtitle format.",
-        "dorsal_adapters.audio.srt",
+        "dorsal_adapters.audio.srt_adapter",
         "to_srt",
         "from_srt",
+        "srt",
     ),
     ("open/audio-transcription", "vtt"): (
         "WebVTT (.vtt) - W3C standard web subtitle format.",
-        "dorsal_adapters.audio.vtt",
+        "dorsal_adapters.audio.vtt_adapter",
         "to_vtt",
         "from_vtt",
+        "vtt",
     ),
     ("open/audio-transcription", "md"): (
         "Markdown (.md) - A markdown-formatted audio transcription",
-        "dorsal_adapters.audio.md",
+        "dorsal_adapters.audio.md_adapter",
         "to_md",
         "from_md",
+        "md",
     ),
-    ("open/audio-transcription", "txt"): ("Plain Text (.txt).", "dorsal_adapters.audio.txt", "to_txt", "from_txt"),
+    ("open/audio-transcription", "txt"): (
+        "Plain Text (.txt).",
+        "dorsal_adapters.audio.txt_adapter",
+        "to_txt",
+        "from_txt",
+        "txt",
+    ),
     ("open/audio-transcription", "tsv"): (
         "Tab-Separated Values (.tsv).",
-        "dorsal_adapters.audio.tsv",
+        "dorsal_adapters.audio.tsv_adapter",
         "to_tsv",
         "from_tsv",
+        "tsv",
+    ),
+    # document-extraction
+    ("open/document-extraction", "txt"): (
+        "Plain Text (.txt).",
+        "dorsal_adapters.document.txt_adapter",
+        "to_txt",
+        "from_txt",
+        "txt",
+    ),
+    ("open/document-extraction", "tsv"): (
+        "Tab-Separated Values (.tsv).",
+        "dorsal_adapters.document.tsv_adapter",
+        "to_tsv",
+        "from_tsv",
+        "tsv",
+    ),
+    ("open/document-extraction", "hocr"): (
+        "hOCR (.html) - An OCR output format in standard HTML",
+        "dorsal_adapters.document.hocr_adapter",
+        "to_hocr",
+        "from_hocr",
+        "hocr.html",
+    ),
+    ("open/document-extraction", "md"): (
+        "Markdown (.md) - A markdown-formatted document transcription",
+        "dorsal_adapters.document.md_adapter",
+        "to_md",
+        "from_md",
+        "md",
+    ),
+    ("open/document-extraction", "html"): (
+        "Semantic HTML (.html) - A responsive, visually inferred layout.",
+        "dorsal_adapters.document.html_adapter",
+        "to_html",
+        "from_html",
+        "html",
     ),
 }
 
-ALIAS_MAPPING = {
-    "audio-transcription": "open/audio-transcription",
-}
+ALIAS_MAPPING = {"audio-transcription": "open/audio-transcription", "document-extraction": "open/document-extraction"}
 
 
 def get_adapter(schema_id: str, format_name: str) -> Adapter:
@@ -117,7 +163,7 @@ def get_adapter(schema_id: str, format_name: str) -> Adapter:
     if schema_id in ALIAS_MAPPING:
         schema_id = ALIAS_MAPPING[schema_id]
     try:
-        desc, module_path, export_name, parse_name = _REGISTRY[(schema_id, format_name)]
+        desc, module_path, export_name, parse_name, ext = _REGISTRY[(schema_id, format_name)]
     except KeyError as err:
         raise ValueError(f"Adapter not found for schema={schema_id} and format={format_name}.") from err
 
@@ -130,6 +176,7 @@ def get_adapter(schema_id: str, format_name: str) -> Adapter:
         schema_id=schema_id,
         format_name=format_name,
         description=desc,
+        extension=ext,
         export_fn=export_fn,
         parse_fn=parse_fn,
     )
@@ -137,5 +184,5 @@ def get_adapter(schema_id: str, format_name: str) -> Adapter:
 
 def list_formats(schema_id: str) -> list[tuple[str, str]]:
     """Returns a list of (format_name, description) for all supported formats of a schema."""
-    formats = [(fmt, desc) for (sid, fmt), (desc, _, _, _) in _REGISTRY.items() if sid == schema_id]
+    formats = [(fmt, desc) for (sid, fmt), (desc, _, _, _, _) in _REGISTRY.items() if sid == schema_id]
     return sorted(formats, key=lambda x: x[0])
