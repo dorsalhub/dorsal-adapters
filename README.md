@@ -64,8 +64,8 @@ In this example, a valid [`open/audio-transcription`](https://docs.dorsalhub.com
 ```python
 from dorsal_adapters.registry import get_adapter
 
-# 1. The raw JSON record from your AI model
-dorsal_record = {
+# 1. The raw JSON record from your model
+transcription = {
     "track_id": 1,
     "language": "eng",
     "segments": [
@@ -81,7 +81,7 @@ dorsal_record = {
 adapter = get_adapter("audio-transcription", "srt")
 
 # 3. Export to the target format (.srt)
-srt_string = adapter.export(dorsal_record)
+srt_string = adapter.export(transcription)
 print(srt_string)
 
 # 4. Parse the formatted string back into a Dorsal record
