@@ -52,7 +52,7 @@ Dorsal Adapters is built to integrate with [Dorsal](https://github.com/dorsalhub
 
 Install the library alongside Dorsal to unlock exports from the Python API or CLI.
 
-Example:
+Example: using `--export` to generate a subtitle file.
 
 ```console
 $ dorsal run dorsalhub/dorsal-whisper /home/video/test.mkv --export=srt
@@ -73,6 +73,8 @@ Outputs saved successfully:
   ↳ /home/user/sandbox/test.dorsal.json
   ↳ /home/user/sandbox/test.srt
 ```
+
+- `--export` can take the ID of adapter for a given output schema (e.g. `md` for Markdown or `txt` for text).
 
 ### Direct Usage
 
