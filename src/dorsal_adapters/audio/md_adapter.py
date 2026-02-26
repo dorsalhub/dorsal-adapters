@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import re
 from typing import Any, Dict
 from dorsal_adapters.common.validation import validate_record
@@ -50,19 +51,41 @@ def to_md(
     include_timestamps: bool = True,
     include_milliseconds: bool = False,
     include_speakers: bool = False,
+    include_frontmatter: bool = True,
+    low_confidence_threshold: float = 0.80,
 ) -> str:
     """Egress: Converts an 'audio-transcription' record into a Markdown document optimized for RAG."""
     if validate:
         validate_record(record, schema_id="audio-transcription", version=schema_version)
+
+    output = []
+
+    if include_frontmatter:
+        frontmatter = ["---"]
+        for key in ["producer", "language", "duration", "score_explanation", "track_id"]:
+            if key in record:
+                frontmatter.append(f"{key}: {record[key]}")
+
+        if "attributes" in record and isinstance(record["attributes"], dict):
+            frontmatter.append("attributes:")
+            for k, v in record["attributes"].items():
+                val_str = json.dumps(v)
+                frontmatter.append(f"  {k}: {val_str}")
+
+        frontmatter.append("---")
+        if len(frontmatter) > 2:
+            output.append("\n".join(frontmatter))
 
     segments = record.get("segments", [])
     if not segments:
         text = record.get("text", "").strip()
         if not text:
             raise ValueError("The provided record contains no 'text' or 'segments'.")
-        return f"# Transcription\n\n{text}"
+        output.append("# Transcription")
+        output.append(text)
+        return "\n\n".join(output)
 
-    lines = ["# Transcription\n"]
+    output.append("# Transcription")
 
     for segment in segments:
         line_parts = []
@@ -78,14 +101,29 @@ def to_md(
                 line_parts.append(f"**{speaker_name}:**")
 
         prefix = " ".join(line_parts)
-        text = segment["text"].strip()
+        text = segment.get("text", "").strip()
+        score = segment.get("score")
+        events = segment.get("events", [])
 
-        if prefix:
-            lines.append(f"{prefix} {text}")
+        if events:
+            event_str = ", ".join(events)
+            output.append(f"> *[{event_str}]*")
+
+        if not text:
+            continue
+
+        if score is not None and score < low_confidence_threshold:
+            if prefix:
+                output.append(f"> ⚠️ **Low Confidence Read ({score:.2f})**:\n> {prefix} {text}")
+            else:
+                output.append(f"> ⚠️ **Low Confidence Read ({score:.2f})**:\n> {text}")
         else:
-            lines.append(text)
+            if prefix:
+                output.append(f"{prefix} {text}")
+            else:
+                output.append(text)
 
-    return "\n\n".join(lines)
+    return "\n\n".join(output)
 
 
 def from_md(
@@ -99,14 +137,25 @@ def from_md(
     if not md_content.strip():
         raise ValueError("Provided Markdown content is empty.")
 
+    clean_content = re.sub(r"^---\n.*?\n---\n", "", md_content, flags=re.DOTALL).strip()
+
     segments = []
     full_text_blocks = []
 
     pattern = re.compile(r"^\*\*\[([\d:]+)\s*-\s*([\d:]+)\]\*\*(?:\s*\*\*([^:]+):\*\*)?\s+(.*)", re.IGNORECASE)
 
-    for line in md_content.splitlines():
+    for line in clean_content.splitlines():
         line = line.strip()
-        if not line or line.startswith("#"):
+
+        if not line or line.startswith("#") or line.startswith("> ⚠️"):
+            continue
+
+        line = re.sub(r"^>\s*", "", line).strip()
+
+        event_match = re.match(r"^\*\[(.*)\]\*$", line)
+        if event_match:
+            events = [e.strip() for e in event_match.group(1).split(",")]
+            segments.append({"start_time": 0.0, "end_time": 0.0, "text": "", "events": events})
             continue
 
         match = pattern.match(line)
@@ -124,9 +173,11 @@ def from_md(
             segments.append({"start_time": 0.0, "end_time": 0.0, "text": clean_text})
             full_text_blocks.append(clean_text)
 
+    clean_text_blocks = [t for t in full_text_blocks if t]
+
     record = {
         "producer": producer,
-        "text": " ".join(full_text_blocks),
+        "text": " ".join(clean_text_blocks),
         "segments": segments,
     }
 
