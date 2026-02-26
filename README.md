@@ -3,10 +3,6 @@
 </p>
 
 <p align="center">
-  <strong>Stop writing custom parsers. Export AI-extracted JSON to industry-standard formats instantly.</strong>
-</p>
-
-<p align="center">
   <a href="https://pypi.org/project/dorsalhub-adapters/">
     <img src="https://img.shields.io/pypi/v/dorsalhub-adapters?color=0ea5e9" alt="PyPI version">
   </a>
