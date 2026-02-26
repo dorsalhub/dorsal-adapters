@@ -48,13 +48,13 @@ pip install dorsalhub-adapters
 
 ### Within Dorsal
 
-Dorsal Adapters is built to integrate with Dorsal.
+Dorsal Adapters is built to integrate with [Dorsal](https://github.com/dorsalhub/dorsal).
 
-Install the library alongside (Dorsal)[https://github.com/dorsalhub/dorsal] to unlock exports from the Python API or CLI within dorsal.
+Install the library alongside Dorsal to unlock exports from the Python API or CLI.
 
-CLI Example:
+Example:
 
-```
+```console
 $ dorsal run dorsalhub/dorsal-whisper /home/video/test.mkv --export=srt
 1
 00:00:01,970 --> 00:00:05,970
