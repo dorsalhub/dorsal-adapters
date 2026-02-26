@@ -3,10 +3,6 @@
 </p>
 
 <p align="center">
-  <strong>Stop writing custom parsers. Export AI-extracted JSON to industry-standard formats instantly.</strong>
-</p>
-
-<p align="center">
   <a href="https://pypi.org/project/dorsalhub-adapters/">
     <img src="https://img.shields.io/pypi/v/dorsalhub-adapters?color=0ea5e9" alt="PyPI version">
   </a>
@@ -22,10 +18,8 @@
 
 ## Supported Formats
 
-Currently supports two-way conversion (exporting and parsing) for the following domains and formats:
-
 ### Document Extraction (`open/document-extraction`)
-Convert complex spatial bounding boxes, text blocks, and multi-polygons into layout-aware formats:
+
 * **`md`**: **RAG-Optimized Markdown** — Injects semantic headings, hallucination warnings, and visual placeholders directly into the text stream for LLM consumption.
 * **`html`**: **Semantic HTML (.html)** — Renders a responsive, visually inferred 2D DOM layout from raw spatial coordinates.
 * **`hocr`**: **hOCR (.hocr.html)** — An industry-standard OCR output format embedding layout, confidence scores, and style information in standard HTML.
@@ -33,7 +27,7 @@ Convert complex spatial bounding boxes, text blocks, and multi-polygons into lay
 * **`txt`**: **Plain Text** — Flattens the document layout into clean, stitched paragraphs.
 
 ### Audio Transcription (`open/audio-transcription`)
-Convert rich transcription data (including speaker diarization, non-verbal events, and timestamps) into standard media formats:
+
 * **`srt`**: **SubRip Text (.srt)** — The most widely used plaintext subtitle format.
 * **`vtt`**: **WebVTT (.vtt)** — The W3C standard web subtitle format for HTML5 video players.
 * **`md`**: **RAG-Optimized Markdown** — Merges speaker tags, non-verbal events (e.g., `[laughter]`), and low-confidence warnings into clean markdown.
@@ -52,12 +46,44 @@ pip install dorsalhub-adapters
 
 ## Usage
 
+### Within Dorsal
+
+Dorsal Adapters is built to integrate with [Dorsal](https://github.com/dorsalhub/dorsal).
+
+Install the library alongside Dorsal to unlock exports from the Python API or CLI.
+
+Example: using `--export` to generate a subtitle file.
+
+```console
+$ dorsal run dorsalhub/dorsal-whisper /home/video/test.mkv --export=srt
+1
+00:00:01,970 --> 00:00:05,970
+You might be wondering how I ended up in this situation.
+
+2
+00:00:05,970 --> 00:00:08,970
+Yeah that's me. A young subtitle.
+
+3
+00:00:08,970 --> 00:00:18,590
+Little did I know what life had in store for me.
+
+
+Outputs saved successfully:
+  ↳ /home/user/sandbox/test.dorsal.json
+  ↳ /home/user/sandbox/test.srt
+```
+
+- `--export` can take the ID of adapter for a given output schema (e.g. `md` for Markdown or `txt` for text).
+
+### Direct Usage
+
 Adapters are Python classes with methods for exporting to and parsing from the supported file formats:
 
 * `export(record)` / `export_file(record, fp)`: Converts a JSON record into a standard format.
 * `parse(content)` / `parse_file(fp)`: Best-effort conversion from a standard format back into a Dorsal JSON Record.
 
-### Example: Audio to Subtitles (SRT)
+#### Example: Audio to Subtitles (SRT)
 
 In this example, a valid [`open/audio-transcription`](https://docs.dorsalhub.com/reference/schemas/open/audio-transcription/) record is converted into a subtitle file.
 
