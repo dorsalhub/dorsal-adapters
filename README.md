@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Export validated JSON to standard formats.</strong>
+  <strong>Stop writing custom parsers. Export AI-extracted JSON to industry-standard formats instantly.</strong>
 </p>
 
 <p align="center">
@@ -20,30 +20,53 @@
 
 **Dorsal Adapters** translates [validated](https://github.com/dorsalhub/open-validation-schemas) JSON records into various industry-standard formats.
 
+Want to generate subtitles? Render semantic HTML from OCR geometry? Feed RAG-optimized Markdown into an LLM pipeline? Dorsal Adapters handles the conversion effortlessly.
+
+## Supported Formats
+
+Currently supports two-way conversion (exporting and parsing) for the following domains and formats:
+
+### 📄 Document Extraction (`open/document-extraction`)
+Convert complex spatial bounding boxes, text blocks, and multi-polygons into layout-aware formats:
+* **`md`**: **RAG-Optimized Markdown** — Injects semantic headings, hallucination warnings, and visual placeholders directly into the text stream for LLM consumption.
+* **`html`**: **Semantic HTML (.html)** — Renders a responsive, visually inferred 2D DOM layout from raw spatial coordinates.
+* **`hocr`**: **hOCR (.hocr.html)** — An industry-standard OCR output format embedding layout, confidence scores, and style information in standard HTML.
+* **`tsv`**: **Tab-Separated Values** — Perfect for spreadsheet ingestion and tabular data analysis.
+* **`txt`**: **Plain Text** — Flattens the document layout into clean, stitched paragraphs.
+
+### 🎙️ Audio Transcription (`open/audio-transcription`)
+Convert rich transcription data (including speaker diarization, non-verbal events, and timestamps) into standard media formats:
+* **`srt`**: **SubRip Text (.srt)** — The most widely used plaintext subtitle format.
+* **`vtt`**: **WebVTT (.vtt)** — The W3C standard web subtitle format for HTML5 video players.
+* **`md`**: **RAG-Optimized Markdown** — Merges speaker tags, non-verbal events (e.g., `[laughter]`), and low-confidence warnings into clean markdown.
+* **`tsv`**: **Tab-Separated Values** — Organizes segments, start/end times, and speakers into a neat table.
+* **`txt`**: **Plain Text** — A continuous, readable transcript.
+
+---
+
 ## Installation
 
-Dorsal Adapters is available on pypi as `dorsalhub-adapters`:
+Dorsal Adapters is available on PyPI as `dorsalhub-adapters`:
 ```bash
 pip install dorsalhub-adapters
+
 ```
 
 ## Usage
 
-Adapters are strictly typed, pure Python classes with four exposed methods: 
-- `export(record)` / `export_file(record, fp)`: Converts a JSON record into a standard format e.g. `audio-transcription` -> **.srt**
-- `parse(content)` / `parse_file(fp)`: Best effort conversion from a standard format to JSON Record, e.g. **.srt** -> `audio-transcription`
+Adapters are Python classes with methods for exporting to and parsing from the supported file formats:
 
-In both cases, the JSON is [Open Validation Schemas](https://github.com/dorsalhub/open-validation-schemas)-compliant.
+* `export(record)` / `export_file(record, fp)`: Converts a JSON record into a standard format.
+* `parse(content)` / `parse_file(fp)`: Best-effort conversion from a standard format back into a Dorsal JSON Record.
 
+### Example: Audio to Subtitles (SRT)
 
-### Example: Two-Way Audio Conversion
-
-In this example, a valid [`open/audio-transcription`](https://docs.dorsalhub.com/reference/schemas/open/audio-transcription/) record is converted to SubRip Text (.srt) format.
+In this example, a valid [`open/audio-transcription`](https://docs.dorsalhub.com/reference/schemas/open/audio-transcription/) record is converted into a subtitle file.
 
 ```python
 from dorsal_adapters.registry import get_adapter
 
-# 1. The record we want to convert.
+# 1. The raw JSON record from your AI model
 dorsal_record = {
     "track_id": 1,
     "language": "eng",
@@ -68,32 +91,19 @@ parsed_record = adapter.parse(srt_string)
 
 ```
 
-**Tip:** You can check what formats are supported for a given schema using `list_formats`:
+**Tip:** You can programmatically check what formats are supported for a given schema using `list_formats`:
 
 ```python
 from dorsal_adapters.registry import list_formats
+print(list_formats("document-extraction"))
 
-print(list_formats("audio-transcription"))
 ```
-
-## Supported Formats
-
-Dorsal Adapters supports two-way conversion (exporting and parsing) between schema-validated JSON records and the following formats:
-
-### Audio Transcription (via `open/audio-transcription`)
-
-* `srt`: SubRip Subtitle format
-* `vtt`: WebVTT format - W3C standard web subtitle format
-* `md`: Markdown format - A markdown-formatted audio transcription optimized for RAG
-* `txt`: Plain Text format
-* `tsv`: Tab-Separated Values format
 
 ## Contributing
 
-We welcome contributions! If you have written a translation script for an **Open Validation Schema** that maps to a widely used industry standard, please open a PR.
-
-See `CONTRIBUTING.md` for our development setup using `uv` and our strict typing guidelines.
+We welcome contributions! If you have written a translation script for an **Open Validation Schema**, please open a PR.
 
 ## License
 
 Dorsal Adapters is open source and provided under the Apache 2.0 license.
+
