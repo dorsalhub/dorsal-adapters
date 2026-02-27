@@ -348,10 +348,11 @@ toml = [
 
 [[package]]
 name = "dorsalhub"
-version = "0.8.2"
+version = "0.8.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "blake3" },
+    { name = "dorsalhub-adapters" },
     { name = "jinja2" },
     { name = "jsonschema-rs" },
     { name = "langcodes" },
@@ -369,14 +370,14 @@ dependencies = [
     { name = "tqdm" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c6/32/86b0bd621fddd311ed7d2b91b13f428e011c4fa016e46dafc773fa2e7d6d/dorsalhub-0.8.2.tar.gz", hash = "sha256:a025969bf286ba4b47019bcd28296ec1eae667c929d3d77d05d5607559314e1d", size = 3655779 }
+sdist = { url = "https://files.pythonhosted.org/packages/6b/fd/72fbae563c79b0709b74cb0ae2784fed8c907ec7800489f1af70233ce6bb/dorsalhub-0.8.4.tar.gz", hash = "sha256:6300be6dc90cd4f8200dd42a80ba1398b5afeaa32624e6e9ffebbdbffec1d0e0", size = 3656254 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/76/8d/3c428330733991411166dcdc8158becda7af0cc933e3ce5232c8bfa4b634/dorsalhub-0.8.2-py3-none-any.whl", hash = "sha256:ba850715ccaf8a7463e20af8265519db88cdcfa90cb9c17904cb61cd1a8098bf", size = 1362717 },
+    { url = "https://files.pythonhosted.org/packages/b6/13/843db7032aad5e0b8a796f1c5657a5e3c9dc11a9fb119a97e6ae5e9004ce/dorsalhub-0.8.4-py3-none-any.whl", hash = "sha256:f53ab9f134d87db3c377558875ee1e82b1e4b9723c264e6d45a1dee8af91c4a7", size = 1362728 },
 ]
 
 [[package]]
 name = "dorsalhub-adapters"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "srt" },
@@ -403,7 +404,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "black", specifier = ">=24.10.0" },
-    { name = "dorsalhub", specifier = ">=0.8.2" },
+    { name = "dorsalhub", specifier = ">=0.8.4" },
     { name = "hocr-tools-lib", specifier = ">=1.2.0" },
     { name = "mypy", specifier = ">=1.15.0" },
     { name = "pytest", specifier = ">=8.3.4" },

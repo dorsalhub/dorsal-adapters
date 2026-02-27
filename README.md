@@ -34,6 +34,12 @@
 * **`tsv`**: **Tab-Separated Values** — Organizes segments, start/end times, and speakers into a neat table.
 * **`txt`**: **Plain Text** — A continuous, readable transcript.
 
+### arXiv Metadata (`dorsal/arxiv`)
+
+* **`bib`**: **BibTeX (.bib)** — A standard bibliographic reference format, for LaTeX integration and academic publishing.
+* **`ris`**: **RIS (.ris)** — A universal citation format, supported by reference managers e.g. Zotero, Mendeley, and EndNote.
+* **`md`**: **RAG-Optimized Markdown** — Embeds standard YAML frontmatter (ID, DOI, Categories, Year) and markdown formatting for ingestion into PKMs or RAG pipelines.
+
 ---
 
 ## Installation
@@ -41,7 +47,6 @@
 Dorsal Adapters is available on PyPI as `dorsalhub-adapters`:
 ```bash
 pip install dorsalhub-adapters
-
 ```
 
 ## Usage
@@ -50,7 +55,7 @@ pip install dorsalhub-adapters
 
 Dorsal Adapters is a core dependency for [Dorsal](https://github.com/dorsalhub/dorsal).
 
-Example: using `--export` to generate a subtitle file.
+Example: using `--export` to generate a subtitle file:
 
 ```console
 $ dorsal run dorsalhub/whisper /home/video/test.mkv --export=srt
@@ -73,6 +78,25 @@ Outputs saved successfully:
 ```
 
 - `--export` can take the ID of adapter for a given output schema (e.g. `md` for Markdown or `txt` for text).
+
+Example 2: using `--export` to generate a BibTeX citation from an ArXiv preprint:
+
+```console
+$ dorsal run dorsalhub/arxiv-pdf ./examples/9304001v1.pdf --export=bibtex
+@misc{solv-int_9304001,
+  title = {q-Discrete Toda Molecule Equation},
+  author = {Kenji Kajiwara and Yasuhiro Ohta and Junkichi Satsuma},
+  eprint = {solv-int/9304001},
+  archivePrefix = {arXiv},
+  primaryClass = {solv-int},
+  doi = {10.1016/0375-9601(93)90705-5},
+  url = {https://arxiv.org/abs/solv-int/9304001},
+  year = {1993}
+}
+Outputs saved successfully:
+  ↳ /home/user/sandbox/arxiv-pdf/9304001v1.dorsal.json
+  ↳ /home/user/sandbox/arxiv-pdf/9304001v1.bib
+```
 
 ### Standalone Usage
 
