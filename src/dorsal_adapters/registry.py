@@ -78,6 +78,21 @@ class Adapter:
 
 
 _REGISTRY: dict[tuple[str, str], tuple[str, str, str, str, str]] = {
+    # dorsal/arxiv
+    ("dorsal/arxiv", "bibtex"): (
+        "BibTeX (.bib) - A bibliographic reference format.",
+        "dorsal_adapters.arxiv.bibtext_adapter",
+        "to_bibtex",
+        "from_bibtex",
+        "bib",
+    ),
+    ("dorsal/arxiv", "md"): (
+        "Markdown (.md) - A RAG-optimized markdown document.",
+        "dorsal_adapters.arxiv.md_adapter",
+        "to_md",
+        "from_md",
+        "md",
+    ),
     # audio-transcription
     ("open/audio-transcription", "srt"): (
         "SubRip Text (.srt) - A widely used, plaintext subtitle format.",
