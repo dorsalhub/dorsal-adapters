@@ -93,6 +93,13 @@ _REGISTRY: dict[tuple[str, str], tuple[str, str, str, str, str]] = {
         "from_md",
         "md",
     ),
+    ("dorsal/arxiv", "ris"): (
+        "RIS (.ris) - A standard reference manager format.",
+        "dorsal_adapters.arxiv.ris_adapter",
+        "to_ris",
+        "from_ris",
+        "ris",
+    ),
     # audio-transcription
     ("open/audio-transcription", "srt"): (
         "SubRip Text (.srt) - A widely used, plaintext subtitle format.",
