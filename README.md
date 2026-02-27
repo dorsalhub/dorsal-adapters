@@ -48,14 +48,12 @@ pip install dorsalhub-adapters
 
 ### Within Dorsal
 
-Dorsal Adapters is built to integrate with [Dorsal](https://github.com/dorsalhub/dorsal).
-
-Install the library alongside Dorsal to unlock exports from the Python API or CLI.
+Dorsal Adapters is a core dependency for [Dorsal](https://github.com/dorsalhub/dorsal).
 
 Example: using `--export` to generate a subtitle file.
 
 ```console
-$ dorsal run dorsalhub/dorsal-whisper /home/video/test.mkv --export=srt
+$ dorsal run dorsalhub/whisper /home/video/test.mkv --export=srt
 1
 00:00:01,970 --> 00:00:05,970
 You might be wondering how I ended up in this situation.
@@ -76,7 +74,7 @@ Outputs saved successfully:
 
 - `--export` can take the ID of adapter for a given output schema (e.g. `md` for Markdown or `txt` for text).
 
-### Direct Usage
+### Standalone Usage
 
 Adapters are Python classes with methods for exporting to and parsing from the supported file formats:
 
@@ -130,4 +128,3 @@ We welcome contributions! If you have written a translation script for an **Open
 ## License
 
 Dorsal Adapters is open source and provided under the Apache 2.0 license.
-
