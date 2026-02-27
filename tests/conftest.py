@@ -15,10 +15,55 @@
 import json
 import os
 import pytest
+from unittest.mock import patch
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
+DORSAL_ARXIV_SCHEMA = {
+    "$id": "dorsal/arxiv",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "title": "Dorsal Arxiv",
+    "description": "Dorsal Arxiv Schema",
+    "properties": {
+        "arxiv_id": {"type": "string", "maxLength": 64, "pattern": "^[a-zA-Z0-9.\\-/]+$"},
+        "title": {"type": "string", "maxLength": 512},
+        "url": {"type": "string", "maxLength": 2048, "format": "uri"},
+        "abstract": {"type": "string", "maxLength": 8192},
+        "authors": {
+            "type": "array",
+            "items": {"type": "string", "maxLength": 1024},
+            "maxItems": 4096
+        },
+        "categories": {
+            "type": "array",
+            "items": {"type": "string", "maxLength": 64},
+            "maxItems": 128
+        },
+        "doi": {"type": ["string", "null"], "maxLength": 256},
+        "journal_ref": {"type": ["string", "null"], "maxLength": 1024},
+        "license": {"type": ["string", "null"], "maxLength": 512},
+        "version": {"type": ["string", "null"], "maxLength": 64}
+    },
+    "required": ["arxiv_id", "title", "abstract", "authors"],
+    "additionalProperties": False
+}
+
+
+@pytest.fixture(autouse=True)
+def mock_dorsal_arxiv_schema():
+    """
+    Automatically intercepts API calls to fetch the dorsal/arxiv schema
+    during tests and returns the local dictionary instead.
+    """
+    def fake_get_dataset_schema(schema_id):
+        if schema_id == "dorsal/arxiv":
+            return DORSAL_ARXIV_SCHEMA
+        raise ValueError(f"Unexpected schema requested in tests: {schema_id}")
+
+    with patch("dorsal.api.dataset.get_dataset_schema", side_effect=fake_get_dataset_schema):
+        yield
 
 def load_json(filename: str) -> dict:
     """Helper to load a JSON file from the data directory."""
