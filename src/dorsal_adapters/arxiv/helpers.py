@@ -14,7 +14,7 @@
 
 import re
 
-RX_ARXIV = re.compile(r"^(\d{2})(\d{2})\.\d{4,5}")
+RX_ARXIV = re.compile(r"^(\d{2})(\d{2})\.\d{4,5}(v\d+)?$")
 RX_ARXIV_LEGACY = re.compile(r"/(\d{2})(\d{2})\d{3}(v\d+)?$")
 
 
@@ -22,7 +22,7 @@ def extract_date_from_id(arxiv_id: str) -> tuple[str, str] | None:
     """Infers the publication year and month from an arXiv ID."""
     modern_match = RX_ARXIV.match(arxiv_id)
     if modern_match:
-        yy, mm = modern_match.groups()
+        yy, mm = modern_match.group(1), modern_match.group(2)
         return str(2000 + int(yy)), str(int(mm))
 
     legacy_match = RX_ARXIV_LEGACY.search(arxiv_id)
