@@ -15,7 +15,7 @@
 import re
 from typing import Any
 
-from dorsal_adapters.arxiv.helpers import extract_year_from_id
+from dorsal_adapters.arxiv.helpers import extract_date_from_id
 from dorsal_adapters.common.validation import validate_record
 
 
@@ -42,9 +42,10 @@ def to_ris(
     if "abstract" in record:
         lines.append(f"AB  - {record['abstract']}")
 
-    year = extract_year_from_id(record.get("arxiv_id", ""))
-    if year:
-        lines.append(f"PY  - {year}")
+    date_info = extract_date_from_id(record.get("arxiv_id", ""))
+    if date_info:
+        year, month = date_info
+        lines.append(f"PY  - {year}/{month.zfill(2)}/")
 
     for category in record.get("categories", []):
         lines.append(f"KW  - {category}")

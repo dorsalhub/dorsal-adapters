@@ -16,7 +16,7 @@ import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
 
 from dorsal_adapters.arxiv.bibtex_adapter import to_bibtex
-from dorsal_adapters.arxiv.helpers import extract_year_from_id
+from dorsal_adapters.arxiv.helpers import extract_date_from_id
 
 
 @pytest.fixture
@@ -32,22 +32,20 @@ def valid_arxiv_record():
     }
 
 
-def test_extract_year_from_id():
-    """Test the regex inferences for publication years from arXiv IDs."""
-    # Modern format
-    assert extract_year_from_id("2405.06604") == "2024"
-    assert extract_year_from_id("2405.06604v2") == "2024"
-    assert extract_year_from_id("0704.0001") == "2007"
+def test_extract_date_from_id():
+    """Test the regex inferences for years and months from arXiv IDs."""
 
-    # Legacy format (1990s)
-    assert extract_year_from_id("solv-int/9304001") == "1993"
-    assert extract_year_from_id("hep-th/9912012v2") == "1999"
+    assert extract_date_from_id("2405.06604") == ("2024", "5")
 
-    # Legacy format (2000s)
-    assert extract_year_from_id("math/0504001") == "2005"
+    assert extract_date_from_id("0704.0001") == ("2007", "4")
 
-    # Invalid / Unrecognized
-    assert extract_year_from_id("not-an-id") is None
+    assert extract_date_from_id("solv-int/9304001") == ("1993", "4")
+
+    assert extract_date_from_id("hep-th/9912012v2") == ("1999", "12")
+
+    assert extract_date_from_id("math/0504001") == ("2005", "4")
+
+    assert extract_date_from_id("not-an-id") is None
 
 
 def test_to_bibtex_full_record(valid_arxiv_record):
@@ -62,7 +60,7 @@ def test_to_bibtex_full_record(valid_arxiv_record):
     assert "primaryClass = {cs.AI}," in bib
     assert "doi = {10.1234/5678}," in bib
     assert "url = {https://arxiv.org/abs/2405.06604}," in bib
-    assert "year = {2024}" in bib  # Checks inference and trailing comma removal
+    assert "year = {2024}" in bib
 
 
 def test_to_bibtex_minimal_record():

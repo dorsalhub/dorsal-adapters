@@ -15,7 +15,7 @@
 import re
 from typing import Any
 
-from dorsal_adapters.arxiv.helpers import extract_year_from_id
+from dorsal_adapters.arxiv.helpers import extract_date_from_id
 from dorsal_adapters.common.validation import validate_record
 
 
@@ -30,11 +30,14 @@ def to_md(
         validate_record(record, schema_id="dorsal/arxiv")
 
     lines = ["---"]
-    lines.append(f"arxiv_id: {record.get('arxiv_id', 'unknown')}")
+    arxiv_id = record.get("arxiv_id", "unknown")
+    lines.append(f"arxiv_id: {arxiv_id}")
 
-    year = extract_year_from_id(record.get("arxiv_id", ""))
-    if year:
+    date_info = extract_date_from_id(arxiv_id)
+    if date_info:
+        year, month = date_info
         lines.append(f"year: {year}")
+        lines.append(f"month: {month}")
 
     if record.get("categories"):
         lines.append(f"categories: [{', '.join(record['categories'])}]")

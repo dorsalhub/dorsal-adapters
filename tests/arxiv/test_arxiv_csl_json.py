@@ -62,7 +62,7 @@ def test_to_csl_json_full_record(valid_arxiv_record):
     assert item["author"][2] == {"given": "C. D.", "family": "Broad"}
     assert item["author"][3] == {"family": "Prince"}
 
-    assert item["issued"]["date-parts"][0] == [2024]
+    assert item["issued"]["date-parts"][0] == [2024, 5]
 
 
 def test_to_csl_json_minimal_record():
@@ -73,7 +73,7 @@ def test_to_csl_json_minimal_record():
 
     assert item["id"] == "math/0504001"
     assert item["type"] == "article"
-    assert item["issued"]["date-parts"][0] == [2005]
+    assert item["issued"]["date-parts"][0] == [2005, 4]
 
     assert "title" not in item
     assert "author" not in item

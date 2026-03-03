@@ -15,7 +15,7 @@
 import re
 from typing import Any
 
-from dorsal_adapters.arxiv.helpers import extract_year_from_id
+from dorsal_adapters.arxiv.helpers import extract_date_from_id
 from dorsal_adapters.common.validation import validate_record
 
 
@@ -51,9 +51,11 @@ def to_bibtex(
     if record.get("url"):
         lines.append(f"  url = {{{record['url']}}},")
 
-    year = extract_year_from_id(arxiv_id)
-    if year:
+    date_info = extract_date_from_id(arxiv_id)
+    if date_info:
+        year, month = date_info
         lines.append(f"  year = {{{year}}},")
+        lines.append(f"  month = {{{month}}},")
 
     if lines[-1].endswith(","):
         lines[-1] = lines[-1][:-1]

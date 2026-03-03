@@ -136,7 +136,7 @@ def test_list_formats_not_found():
 
 def test_adapter_not_implemented_errors():
     """
-    Test that calling export or parse methods on an adapter without 
+    Test that calling export or parse methods on an adapter without
     defined functions raises NotImplementedError.
     """
     dead_adapter = Adapter(
@@ -164,12 +164,9 @@ def test_adapter_not_implemented_errors():
 def test_one_way_adapter():
     adapter = get_adapter("dorsal/arxiv", "bibtex")
 
-    assert "@misc" in adapter.export({
-        "arxiv_id": "2405.06604",
-        "title": "Title",
-        "abstract": "Abstract",
-        "authors": ["Author"]
-    })
+    assert "@misc" in adapter.export(
+        {"arxiv_id": "2405.06604", "title": "Title", "abstract": "Abstract", "authors": ["Author"]}
+    )
 
     with pytest.raises(NotImplementedError, match="Parsing from 'bibtex' is not currently supported"):
         adapter.parse("@misc{...}")

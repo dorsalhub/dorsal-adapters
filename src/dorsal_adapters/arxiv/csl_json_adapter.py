@@ -15,7 +15,7 @@
 import json
 from typing import Any
 
-from dorsal_adapters.arxiv.helpers import extract_year_from_id
+from dorsal_adapters.arxiv.helpers import extract_date_from_id
 
 
 def _parse_author_name(full_name: str) -> dict[str, str]:
@@ -55,9 +55,10 @@ def to_csl_json(
     if "authors" in record:
         csl_item["author"] = [_parse_author_name(a) for a in record["authors"]]
 
-    year = extract_year_from_id(arxiv_id)
-    if year:
-        csl_item["issued"] = {"date-parts": [[int(year)]]}
+    date_info = extract_date_from_id(arxiv_id)
+    if date_info:
+        year, month = date_info
+        csl_item["issued"] = {"date-parts": [[int(year), int(month)]]}
 
     if "url" in record:
         csl_item["URL"] = record["url"]
