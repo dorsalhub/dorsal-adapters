@@ -15,7 +15,7 @@
 import pytest
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
 
-from dorsal_adapters.arxiv.bibtext_adapter import to_bibtex, from_bibtex
+from dorsal_adapters.arxiv.bibtex_adapter import to_bibtex
 from dorsal_adapters.arxiv.helpers import extract_year_from_id
 
 
@@ -74,42 +74,3 @@ def test_to_bibtex_minimal_record():
     assert "eprint = {math/0504001}," in bib
     assert "year = {2005}" in bib
     assert "title =" not in bib
-
-
-def test_from_bibtex_parsing():
-    """Test standard ingress regex parsing of BibTeX back to dictionary."""
-    bib_input = """
-    @misc{2405_06604v1,
-      title = {A Great Paper},
-      author = {Alice Smith and Bob Jones},
-      eprint = {2405.06604v1},
-      primaryClass = {cs.AI},
-      doi = {10.1234/5678},
-      url = {https://arxiv.org/abs/2405.06604}
-    }
-    """
-    record = from_bibtex(bib_input, validate=False)
-
-    assert record["title"] == "A Great Paper"
-    assert record["authors"] == ["Alice Smith", "Bob Jones"]
-    assert record["arxiv_id"] == "2405.06604v1"
-    assert "cs.AI" in record["categories"]
-    assert record["doi"] == "10.1234/5678"
-    assert record["url"] == "https://arxiv.org/abs/2405.06604"
-
-
-def test_from_bibtex_empty():
-    """Ensure ingress fails gracefully on empty content."""
-    with pytest.raises(ValueError, match="empty"):
-        from_bibtex("   \n  ", validate=False)
-
-
-def test_from_bibtex_validation_failure():
-    """
-    Since BibTeX doesn't store abstracts, parsing it back to dorsal/arxiv
-    should fail strict schema validation because 'abstract' is required.
-    """
-    bib_input = "@misc{key, title={Test Paper}, eprint={1234.5678}, author={John Doe}}"
-
-    with pytest.raises(JsonSchemaValidationError):
-        from_bibtex(bib_input, validate=True)

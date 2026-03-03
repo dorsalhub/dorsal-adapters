@@ -91,36 +91,3 @@ def to_md(
             output.append(text)
 
     return "\n\n".join(output)
-
-
-def from_md(
-    md_content: str, producer: str = "md-adapter", *, validate: bool = True, schema_version: str | None = None
-) -> dict[str, Any]:
-    """Ingress: Parses a Markdown string back into a 'document-extraction' record."""
-    if not md_content.strip():
-        raise ValueError("Provided Markdown content is empty.")
-
-    clean_content = re.sub(r"^---\n.*?\n---\n", "", md_content, flags=re.DOTALL).strip()
-
-    blocks = []
-    current_page = 1
-    page_pattern = re.compile(r"^##\s+Page\s+(\d+)", re.IGNORECASE)
-
-    for line in clean_content.splitlines():
-        line_stripped = line.strip()
-        if not line_stripped or line_stripped == "---":
-            continue
-
-        match = page_pattern.match(line_stripped)
-        if match:
-            current_page = int(match.group(1))
-            continue
-
-        blocks.append({"block_type": "text", "text": line_stripped, "page_number": current_page})
-
-    record = {"producer": producer, "extraction_type": "text", "blocks": blocks}
-
-    if validate:
-        validate_record(record, schema_id="document-extraction", version=schema_version)
-
-    return record

@@ -61,32 +61,3 @@ def to_bibtex(
     lines.append("}")
 
     return "\n".join(lines)
-
-
-def from_bibtex(content: str, *, validate: bool = False, **kwargs: Any) -> dict[str, Any]:
-    """Best-effort parsing of a BibTeX string back into a 'dorsal/arxiv' record."""
-    if not content.strip():
-        raise ValueError("Provided BibTeX content is empty.")
-
-    record: dict[str, Any] = {"categories": []}
-
-    for match in re.finditer(r"^\s*([a-zA-Z]+)\s*=\s*[{'\"](.*)[}'\"],?$", content, re.MULTILINE):
-        key, value = match.group(1).lower(), match.group(2)
-
-        if key == "title":
-            record["title"] = value
-        elif key == "author":
-            record["authors"] = value.split(" and ")
-        elif key == "eprint":
-            record["arxiv_id"] = value
-        elif key == "primaryclass":
-            record["categories"].append(value)
-        elif key == "doi":
-            record["doi"] = value
-        elif key == "url":
-            record["url"] = value
-
-    if validate:
-        validate_record(record, schema_id="dorsal/arxiv")
-
-    return record
