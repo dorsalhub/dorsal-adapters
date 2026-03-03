@@ -161,11 +161,7 @@ def test_adapter_not_implemented_errors():
         dead_adapter.parse_file(io.StringIO("content"))
 
 
-def test_real_world_one_way_adapter():
-    """
-    Verify NotImplementedError using a real registered adapter 
-    that only supports one-way conversion (e.g., BibTeX).
-    """
+def test_one_way_adapter():
     adapter = get_adapter("dorsal/arxiv", "bibtex")
 
     assert "@misc" in adapter.export({
