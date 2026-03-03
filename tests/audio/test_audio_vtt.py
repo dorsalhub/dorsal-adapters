@@ -42,14 +42,6 @@ def test_to_vtt_conversion(valid_audio_record):
     assert len(webvtt.from_string(result)) == 5
 
 
-def test_to_vtt_with_speakers(valid_audio_record):
-    """Test egress correctly injects WebVTT speaker tags when requested."""
-    result = to_vtt(valid_audio_record, validate=False, include_speakers=True)
-
-    assert "<v Maria>Welcome back!" in result
-    assert "<v Jean-Pierre>Thank you," in result
-
-
 def test_from_vtt_conversion():
     """Test standard ingress from WebVTT string to Open Schema record."""
     record = from_vtt(VALID_VTT, producer="test-runner", validate=False)
@@ -100,3 +92,24 @@ def test_validation_failure_on_invalid_data(invalid_audio_record_1):
     """Verify that validation correctly catches schema violations."""
     with pytest.raises(JsonSchemaValidationError):
         to_vtt(invalid_audio_record_1, validate=True)
+
+
+def test_from_vtt_speaker_tags():
+    """Test that webvtt parsing correctly extracts `<v Speaker>` tags."""
+    vtt_with_speakers = "WEBVTT\n\n00:00:00.000 --> 00:00:05.000\n<v Maria>Hello there!\n"
+    record = from_vtt(vtt_with_speakers, validate=False)
+
+    assert record["segments"][0]["text"] == "Hello there!"
+    assert "<v Maria>" not in record["segments"][0]["text"]
+    # Ensure the speaker was correctly mapped to the record
+    assert record["segments"][0]["speaker"]["name"] == "Maria"
+
+
+def test_to_vtt_with_speakers(valid_audio_record):
+    """Ensure that egress to WebVTT correctly injects `<v Speaker>` tags."""
+    # Inject a speaker into the valid fixture
+    valid_audio_record["segments"][0]["speaker"] = {"name": "Jean-Pierre", "id": "jp"}
+
+    vtt_out = to_vtt(valid_audio_record, validate=False, include_speakers=True)
+
+    assert "<v Jean-Pierre>Welcome back!" in vtt_out

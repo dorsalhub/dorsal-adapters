@@ -101,7 +101,7 @@ _REGISTRY: dict[tuple[str, str], tuple[str, str, str, str | None, str]] = {
     # dorsal/arxiv
     ("dorsal/arxiv", "bibtex"): (
         "BibTeX (.bib) - A bibliographic reference format.",
-        "dorsal_adapters.arxiv.bibtext_adapter",
+        "dorsal_adapters.arxiv.bibtex_adapter",
         "to_bibtex",
         None,
         "bib",
@@ -119,6 +119,13 @@ _REGISTRY: dict[tuple[str, str], tuple[str, str, str, str | None, str]] = {
         "to_ris",
         None,
         "ris",
+    ),
+    ("dorsal/arxiv", "csl-json"): (
+        "CSL-JSON (.json) - Citation Style Language JSON format.",
+        "dorsal_adapters.arxiv.csl_json_adapter",
+        "to_csl_json",
+        None,
+        "csl.json",
     ),
     # audio-transcription
     ("open/audio-transcription", "srt"): (
@@ -196,6 +203,12 @@ _REGISTRY: dict[tuple[str, str], tuple[str, str, str, str | None, str]] = {
 
 ALIAS_MAPPING = {"audio-transcription": "open/audio-transcription", "document-extraction": "open/document-extraction"}
 
+FORMAT_ALIASES: dict[str, str] = {
+    "bib": "bibtex",
+    "csl": "csl-json",
+    "markdown": "md",
+}
+
 
 def get_adapter(schema_id: str, format_name: str) -> Adapter:
     """
@@ -204,6 +217,9 @@ def get_adapter(schema_id: str, format_name: str) -> Adapter:
     """
     if schema_id in ALIAS_MAPPING:
         schema_id = ALIAS_MAPPING[schema_id]
+
+    format_name = FORMAT_ALIASES.get(format_name, format_name)
+
     try:
         desc, module_path, export_name, parse_name, ext = _REGISTRY[(schema_id, format_name)]
     except KeyError as err:

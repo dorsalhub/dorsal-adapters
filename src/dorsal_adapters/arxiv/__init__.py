@@ -15,6 +15,7 @@
 from dorsal_adapters.arxiv.bibtex_adapter import to_bibtex
 from dorsal_adapters.arxiv.md_adapter import from_md, to_md
 from dorsal_adapters.arxiv.ris_adapter import to_ris
+from dorsal_adapters.arxiv.csl_json_adapter import to_csl_json
 
 
-__all__ = ["from_md", "to_bibtex", "to_md", "to_ris"]
+__all__ = ["from_md", "to_bibtex", "to_csl_json", "to_md", "to_ris"]

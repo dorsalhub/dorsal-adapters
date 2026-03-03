@@ -25,6 +25,7 @@ def to_srt(
     *,
     validate: bool = True,
     schema_version: str | None = None,
+    include_speakers: bool = False,
 ) -> str:
     """Converts an Open Validation Schema 'audio-transcription' record into a formatted SRT string.
 
@@ -44,7 +45,15 @@ def to_srt(
         start = datetime.timedelta(seconds=segment["start_time"])
         end = datetime.timedelta(seconds=segment["end_time"])
 
-        sub = srt.Subtitle(index=i, start=start, end=end, content=segment["text"].strip())
+        content = segment["text"].strip()
+
+        # Inject speaker names if requested
+        if include_speakers:
+            speaker = segment.get("speaker")
+            if speaker and "name" in speaker:
+                content = f"{speaker['name']}: {content}"
+
+        sub = srt.Subtitle(index=i, start=start, end=end, content=content)
         subtitles.append(sub)
 
     return str(srt.compose(subtitles))
