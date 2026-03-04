@@ -36,9 +36,11 @@
 
 ### arXiv Metadata (`dorsal/arxiv`)
 
-* **`bib`**: **BibTeX (.bib)** — A standard bibliographic reference format, for LaTeX integration and academic publishing.
-* **`ris`**: **RIS (.ris)** — A universal citation format, supported by reference managers e.g. Zotero, Mendeley, and EndNote.
+* **`bib`**: **BibTeX (.bib)** — A standard bibliographic reference format.
+* **`csl-json`**: **CSL-JSON (.json)** — A standard bibliographic reference format.
+* **`ris`**: **RIS (.ris)** — A standard bibliographic reference format.
 * **`md`**: **RAG-Optimized Markdown** — Embeds standard YAML frontmatter (ID, DOI, Categories, Year) and markdown formatting for ingestion into PKMs or RAG pipelines.
+
 
 ---
 

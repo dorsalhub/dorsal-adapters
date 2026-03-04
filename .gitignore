@@ -227,3 +227,4 @@ test
 requirements.txt
 *.temp.bin
 coverage.xml
+dorsal.toml

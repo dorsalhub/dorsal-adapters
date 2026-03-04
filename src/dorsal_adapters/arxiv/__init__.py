@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dorsal_adapters.arxiv.bibtext_adapter import from_bibtex, to_bibtex
+from dorsal_adapters.arxiv.bibtex_adapter import to_bibtex
 from dorsal_adapters.arxiv.md_adapter import from_md, to_md
-from dorsal_adapters.arxiv.ris_adapter import from_ris, to_ris
+from dorsal_adapters.arxiv.ris_adapter import to_ris
+from dorsal_adapters.arxiv.csl_json_adapter import to_csl_json
 
 
-__all__ = ["from_bibtex", "from_md", "from_ris", "to_bibtex", "to_md", "to_ris"]
+__all__ = ["from_md", "to_bibtex", "to_csl_json", "to_md", "to_ris"]

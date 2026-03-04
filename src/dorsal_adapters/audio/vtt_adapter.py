@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import webvtt
+import re
 from typing import Any
+
+import webvtt
 
 from dorsal_adapters.common.validation import validate_record
 
@@ -96,7 +98,13 @@ def from_vtt(
 
         text = caption.text.replace("\n", " ").strip()
 
-        segments.append({"text": text, "start_time": start_time, "end_time": end_time})
+        segment: dict[str, Any] = {"text": text, "start_time": start_time, "end_time": end_time}
+
+        if getattr(caption, "voice", None):
+            speaker_name = caption.voice.strip()
+            segment["speaker"] = {"id": speaker_name, "name": speaker_name}
+
+        segments.append(segment)
         full_text_blocks.append(text)
 
     record = {

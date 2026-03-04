@@ -29,8 +29,8 @@ class Adapter:
         format_name: str,
         description: str,
         extension: str,
-        export_fn: Callable[..., Any],
-        parse_fn: Callable[..., dict[str, Any]],
+        export_fn: Callable[..., Any] | None,
+        parse_fn: Callable[..., dict[str, Any]] | None,
     ) -> None:
         self.schema_id = schema_id
         self.format_name = format_name
@@ -44,6 +44,11 @@ class Adapter:
         Converts a Dorsal record into the target format.
         Smartly accepts either a Python dictionary or a stringified JSON record.
         """
+        if self._export_fn is None:
+            raise NotImplementedError(
+                f"Exporting to '{self.format_name}' is not currently supported for schema '{self.schema_id}'."
+            )
+
         if isinstance(record, (str, bytes)):
             try:
                 record = json.loads(record)
@@ -59,31 +64,46 @@ class Adapter:
         """
         Parses the target format (e.g., an SRT string) into a validated Dorsal record.
         """
+        if self._parse_fn is None:
+            raise NotImplementedError(
+                f"Parsing from '{self.format_name}' is not currently supported for schema '{self.schema_id}'."
+            )
+
         return self._parse_fn(content, **kwargs)
 
     def export_file(self, record: dict[str, Any] | str | bytes, fp: IO[Any], **kwargs: Any) -> None:
         """
         Converts a Dorsal record and writes it directly to a file-like object.
         """
+        if self._export_fn is None:
+            raise NotImplementedError(
+                f"Exporting to '{self.format_name}' is not currently supported for schema '{self.schema_id}'."
+            )
+
         fp.write(self.export(record, **kwargs))
 
     def parse_file(self, fp: IO[Any], **kwargs: Any) -> dict[str, Any]:
         """
         Reads from a file-like object and parses it into a validated Dorsal record.
         """
+        if self._parse_fn is None:
+            raise NotImplementedError(
+                f"Parsing from '{self.format_name}' is not currently supported for schema '{self.schema_id}'."
+            )
+
         return self.parse(fp.read(), **kwargs)
 
     def __repr__(self) -> str:
         return f"Adapter(schema_id='{self.schema_id}', format_name='{self.format_name}')"
 
 
-_REGISTRY: dict[tuple[str, str], tuple[str, str, str, str, str]] = {
+_REGISTRY: dict[tuple[str, str], tuple[str, str, str, str | None, str]] = {
     # dorsal/arxiv
     ("dorsal/arxiv", "bibtex"): (
         "BibTeX (.bib) - A bibliographic reference format.",
-        "dorsal_adapters.arxiv.bibtext_adapter",
+        "dorsal_adapters.arxiv.bibtex_adapter",
         "to_bibtex",
-        "from_bibtex",
+        None,
         "bib",
     ),
     ("dorsal/arxiv", "md"): (
@@ -97,8 +117,15 @@ _REGISTRY: dict[tuple[str, str], tuple[str, str, str, str, str]] = {
         "RIS (.ris) - A standard reference manager format.",
         "dorsal_adapters.arxiv.ris_adapter",
         "to_ris",
-        "from_ris",
+        None,
         "ris",
+    ),
+    ("dorsal/arxiv", "csl-json"): (
+        "CSL-JSON (.json) - Citation Style Language JSON format.",
+        "dorsal_adapters.arxiv.csl_json_adapter",
+        "to_csl_json",
+        None,
+        "csl.json",
     ),
     # audio-transcription
     ("open/audio-transcription", "srt"): (
@@ -162,19 +189,25 @@ _REGISTRY: dict[tuple[str, str], tuple[str, str, str, str, str]] = {
         "Markdown (.md) - A markdown-formatted document transcription",
         "dorsal_adapters.document.md_adapter",
         "to_md",
-        "from_md",
+        None,
         "md",
     ),
     ("open/document-extraction", "html"): (
         "Semantic HTML (.html) - A responsive, visually inferred layout.",
         "dorsal_adapters.document.html_adapter",
         "to_html",
-        "from_html",
+        None,
         "html",
     ),
 }
 
 ALIAS_MAPPING = {"audio-transcription": "open/audio-transcription", "document-extraction": "open/document-extraction"}
+
+FORMAT_ALIASES: dict[str, str] = {
+    "bib": "bibtex",
+    "csl": "csl-json",
+    "markdown": "md",
+}
 
 
 def get_adapter(schema_id: str, format_name: str) -> Adapter:
@@ -184,6 +217,9 @@ def get_adapter(schema_id: str, format_name: str) -> Adapter:
     """
     if schema_id in ALIAS_MAPPING:
         schema_id = ALIAS_MAPPING[schema_id]
+
+    format_name = FORMAT_ALIASES.get(format_name, format_name)
+
     try:
         desc, module_path, export_name, parse_name, ext = _REGISTRY[(schema_id, format_name)]
     except KeyError as err:
@@ -191,8 +227,8 @@ def get_adapter(schema_id: str, format_name: str) -> Adapter:
 
     module = importlib.import_module(module_path)
 
-    export_fn = getattr(module, export_name)
-    parse_fn = getattr(module, parse_name)
+    export_fn = getattr(module, export_name) if export_name else None
+    parse_fn = getattr(module, parse_name) if parse_name else None
 
     return Adapter(
         schema_id=schema_id,

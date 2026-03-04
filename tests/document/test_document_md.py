@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pytest
-from dorsal_adapters.document.md_adapter import to_md, from_md
+from dorsal_adapters.document.md_adapter import to_md
 
 
 def test_to_md_rich_rag_features():
@@ -45,30 +45,6 @@ def test_to_md_rich_rag_features():
 
     no_fm = to_md(record, validate=False, include_frontmatter=False)
     assert "---" not in no_fm
-
-
-def test_from_md_conversion():
-    """Test ingress parsing including page header matching and validation coverage."""
-    md_input = "---\nproducer: test\n---\n## Page 1\nHello\n## Page 2\nWorld"
-
-    record = from_md(md_input, validate=True)
-
-    assert record["blocks"][0]["page_number"] == 1
-    assert record["blocks"][1]["page_number"] == 2
-
-
-def test_md_errors():
-    """Ensure ValueErrors are raised for empty inputs."""
-    with pytest.raises(ValueError):
-        to_md({"blocks": []}, validate=False)
-    with pytest.raises(ValueError):
-        from_md("   ", validate=False)
-
-
-def test_from_md_empty():
-    """Ensure ingress fails gracefully on empty text."""
-    with pytest.raises(ValueError):
-        from_md("   \n  ", validate=False)
 
 
 def test_to_md_empty():
@@ -104,21 +80,3 @@ def test_to_md_validation_and_skips():
     assert "Valid text" in result
     assert "> *[Multi_polygon at x:10, y:10, w:10, h:10]*" in result
     assert "Valid text\n\n> *[Multi_polygon" in result
-
-
-def test_from_md_line_skipping():
-    """Test that the parser safely skips empty lines and separator artifacts."""
-    md_input = """
-    
-    ---
-    ## Page 1
-    
-    Actual Content
-    
-    ---
-    
-    """
-    record = from_md(md_input, validate=False)
-
-    assert len(record["blocks"]) == 1
-    assert record["blocks"][0]["text"] == "Actual Content"

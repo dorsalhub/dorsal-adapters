@@ -13,6 +13,5 @@
 # limitations under the License.
 
 from dorsal_adapters.document.html_adapter.exporter import to_html
-from dorsal_adapters.document.html_adapter.parser import from_html
 
-__all__ = ["from_html", "to_html"]
+__all__ = ["to_html"]

@@ -132,3 +132,41 @@ def test_list_formats_not_found():
     """Ensure list_formats returns an empty list for unknown schemas."""
     formats = list_formats("fake/schema")
     assert formats == []
+
+
+def test_adapter_not_implemented_errors():
+    """
+    Test that calling export or parse methods on an adapter without
+    defined functions raises NotImplementedError.
+    """
+    dead_adapter = Adapter(
+        schema_id="test/none",
+        format_name="none",
+        description="No functions",
+        extension="txt",
+        export_fn=None,
+        parse_fn=None,
+    )
+
+    with pytest.raises(NotImplementedError, match="Exporting to 'none' is not currently supported"):
+        dead_adapter.export({"key": "val"})
+
+    with pytest.raises(NotImplementedError, match="Parsing from 'none' is not currently supported"):
+        dead_adapter.parse("some content")
+
+    with pytest.raises(NotImplementedError, match="Exporting to 'none' is not currently supported"):
+        dead_adapter.export_file({"key": "val"}, io.StringIO())
+
+    with pytest.raises(NotImplementedError, match="Parsing from 'none' is not currently supported"):
+        dead_adapter.parse_file(io.StringIO("content"))
+
+
+def test_one_way_adapter():
+    adapter = get_adapter("dorsal/arxiv", "bibtex")
+
+    assert "@misc" in adapter.export(
+        {"arxiv_id": "2405.06604", "title": "Title", "abstract": "Abstract", "authors": ["Author"]}
+    )
+
+    with pytest.raises(NotImplementedError, match="Parsing from 'bibtex' is not currently supported"):
+        adapter.parse("@misc{...}")

@@ -92,3 +92,13 @@ def test_to_srt_missing_segments(invalid_audio_record_2):
     """Ensure egress fails gracefully if the record is missing segments."""
     with pytest.raises(ValueError, match="does not contain any 'segments'"):
         to_srt(invalid_audio_record_2, validate=False)
+
+
+def test_to_srt_with_speakers(valid_audio_record):
+    """Ensure that the `include_speakers` flag prepends the speaker name."""
+    # Inject a speaker into the valid fixture
+    valid_audio_record["segments"][0]["speaker"] = {"name": "Jean-Pierre", "id": "jp"}
+
+    srt_out = to_srt(valid_audio_record, validate=False, include_speakers=True)
+
+    assert "Jean-Pierre: Welcome back!" in srt_out

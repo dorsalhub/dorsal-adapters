@@ -15,7 +15,7 @@
 import re
 from typing import Any
 
-from dorsal_adapters.arxiv.helpers import extract_year_from_id
+from dorsal_adapters.arxiv.helpers import extract_date_from_id
 from dorsal_adapters.common.validation import validate_record
 
 
@@ -42,9 +42,10 @@ def to_ris(
     if "abstract" in record:
         lines.append(f"AB  - {record['abstract']}")
 
-    year = extract_year_from_id(record.get("arxiv_id", ""))
-    if year:
-        lines.append(f"PY  - {year}")
+    date_info = extract_date_from_id(record.get("arxiv_id", ""))
+    if date_info:
+        year, month = date_info
+        lines.append(f"PY  - {year}/{month.zfill(2)}/")
 
     for category in record.get("categories", []):
         lines.append(f"KW  - {category}")
@@ -61,38 +62,3 @@ def to_ris(
     lines.append("ER  - ")
 
     return "\n".join(lines)
-
-
-def from_ris(content: str, *, validate: bool = False, **kwargs: Any) -> dict[str, Any]:
-    """Best-effort parsing of an RIS string back into a 'dorsal/arxiv' record."""
-    if not content.strip():
-        raise ValueError("Provided RIS content is empty.")
-
-    record: dict[str, Any] = {"authors": [], "categories": []}
-
-    for line in content.splitlines():
-        if len(line) < 6 or line[2:6] != "  - ":
-            continue
-
-        tag = line[:2]
-        value = line[6:].strip()
-
-        if tag == "T1":
-            record["title"] = value
-        elif tag == "AU":
-            record["authors"].append(value)
-        elif tag == "AB":
-            record["abstract"] = value
-        elif tag == "DO":
-            record["doi"] = value
-        elif tag == "UR":
-            record["url"] = value
-        elif tag == "KW":
-            record["categories"].append(value)
-        elif tag == "M3":
-            record["arxiv_id"] = value
-
-    if validate:
-        validate_record(record, schema_id="dorsal/arxiv")
-
-    return record

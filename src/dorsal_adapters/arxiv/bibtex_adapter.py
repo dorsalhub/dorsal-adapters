@@ -15,7 +15,7 @@
 import re
 from typing import Any
 
-from dorsal_adapters.arxiv.helpers import extract_year_from_id
+from dorsal_adapters.arxiv.helpers import extract_date_from_id
 from dorsal_adapters.common.validation import validate_record
 
 
@@ -51,9 +51,11 @@ def to_bibtex(
     if record.get("url"):
         lines.append(f"  url = {{{record['url']}}},")
 
-    year = extract_year_from_id(arxiv_id)
-    if year:
+    date_info = extract_date_from_id(arxiv_id)
+    if date_info:
+        year, month = date_info
         lines.append(f"  year = {{{year}}},")
+        lines.append(f"  month = {{{month}}},")
 
     if lines[-1].endswith(","):
         lines[-1] = lines[-1][:-1]
@@ -61,32 +63,3 @@ def to_bibtex(
     lines.append("}")
 
     return "\n".join(lines)
-
-
-def from_bibtex(content: str, *, validate: bool = False, **kwargs: Any) -> dict[str, Any]:
-    """Best-effort parsing of a BibTeX string back into a 'dorsal/arxiv' record."""
-    if not content.strip():
-        raise ValueError("Provided BibTeX content is empty.")
-
-    record: dict[str, Any] = {"categories": []}
-
-    for match in re.finditer(r"^\s*([a-zA-Z]+)\s*=\s*[{'\"](.*)[}'\"],?$", content, re.MULTILINE):
-        key, value = match.group(1).lower(), match.group(2)
-
-        if key == "title":
-            record["title"] = value
-        elif key == "author":
-            record["authors"] = value.split(" and ")
-        elif key == "eprint":
-            record["arxiv_id"] = value
-        elif key == "primaryclass":
-            record["categories"].append(value)
-        elif key == "doi":
-            record["doi"] = value
-        elif key == "url":
-            record["url"] = value
-
-    if validate:
-        validate_record(record, schema_id="dorsal/arxiv")
-
-    return record
