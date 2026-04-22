@@ -20,7 +20,7 @@
 
 ### Document Extraction (`open/document-extraction`)
 
-* **`md`**: **RAG-Optimized Markdown** — Injects semantic headings, hallucination warnings, and visual placeholders directly into the text stream for LLM consumption.
+* **`md`**: **RAG-Optimized Markdown** — Injects semantic headings into the text for LLM consumption.
 * **`html`**: **Semantic HTML (.html)** — Renders a responsive, visually inferred 2D DOM layout from raw spatial coordinates.
 * **`hocr`**: **hOCR (.hocr.html)** — An industry-standard OCR output format embedding layout, confidence scores, and style information in standard HTML.
 * **`tsv`**: **Tab-Separated Values** — Perfect for spreadsheet ingestion and tabular data analysis.
