@@ -123,3 +123,42 @@ def test_to_html_col_missing_text(valid_document_record_2):
 
     assert '<div class="figure-placeholder">[box]</div>' in result
     assert '<div class="figure-placeholder">[multi_polygon]</div>' in result
+
+
+def test_to_html_fragment_true(valid_document_record_1):
+    """Test that setting fragment=True omits the HTML shell and style blocks."""
+    result = to_html(valid_document_record_1, validate=False, fragment=True)
+
+    assert "<!DOCTYPE html>" not in result
+    assert "<html" not in result
+    assert "<head>" not in result
+    assert "<style>" not in result
+    assert "<body>" not in result
+    assert "</body>" not in result
+    assert "</html>" not in result
+
+    assert "Annual Report Summary" in result
+    assert '<div class="layout-y">' in result
+    assert 'class="page-container page-flow">' in result
+
+
+def test_to_html_fragment_empty():
+    """Ensure empty records work properly in fragment mode."""
+    result = to_html({"extraction_type": "text", "blocks": []}, validate=False, fragment=True)
+
+    assert "<!DOCTYPE html>" not in result
+    assert "<body>" not in result
+
+    assert "No content extracted from this document." in result
+
+
+def test_to_html_fragment_with_footer(valid_document_record_1):
+    """Ensure footers are appended correctly when rendering as a fragment."""
+    custom_footer = "<p>My Fragment Footer</p>"
+    result = to_html(valid_document_record_1, validate=False, fragment=True, footer=custom_footer)
+
+    assert "<body>" not in result
+    assert "</html>" not in result
+
+    assert '<div class="document-footer">' in result
+    assert custom_footer in result

@@ -32,6 +32,7 @@ def to_html(
     layout: Literal["col", "grid", "wireframe"] = "col",
     style: Literal["default", "dark", "none"] | str = "default",
     footer: str | None = None,
+    fragment: bool = False,
     **kwargs: Any,
 ) -> str:
     """Egress: Converts a 'document-extraction' record into responsive semantic HTML."""
@@ -41,38 +42,44 @@ def to_html(
     unit = record.get("unit", "px")
     spatial_pages = extract_spatial_pages(record, strict=strict, **kwargs)
 
-    theme_css = THEMES.get(style)
-    if theme_css is None:
-        if not os.path.isfile(style):
-            raise ValueError(
-                f"Style '{style}' is neither a known theme ('default', 'dark', 'none') nor a valid file path."
-            )
-        with open(style, "r", encoding="utf-8") as f:
-            theme_css = f.read()
+    html_out = []
 
-    html_out = [
-        "<!DOCTYPE html>",
-        '<html lang="en">',
-        "<head>",
-        '  <meta charset="utf-8"/>',
-        "  <title>Document Extraction</title>",
-        "  <style>",
-        CORE_CSS,
-        theme_css,
-        "  </style>",
-        "</head>",
-        "<body>",
-    ]
+    if not fragment:
+        theme_css = THEMES.get(style)
+        if theme_css is None:
+            if not os.path.isfile(style):
+                raise ValueError(
+                    f"Style '{style}' is neither a known theme ('default', 'dark', 'none') nor a valid file path."
+                )
+            with open(style, "r", encoding="utf-8") as f:
+                theme_css = f.read()
+
+        html_out.extend(
+            [
+                "<!DOCTYPE html>",
+                '<html lang="en">',
+                "<head>",
+                '  <meta charset="utf-8"/>',
+                "  <title>Document Extraction</title>",
+                "  <style>",
+                CORE_CSS,
+                theme_css,
+                "  </style>",
+                "</head>",
+                "<body>",
+            ]
+        )
 
     if not spatial_pages:
         html_out.append(
             '  <div class="page-container page-flow"><p class="block-text"><em>No content extracted from this document.</em></p></div>'
         )
-
         if footer:
             html_out.append(f'  <div class="document-footer">\n    {footer}\n  </div>')
 
-        html_out.append("</body>\n</html>")
+        if not fragment:
+            html_out.extend(["</body>", "</html>"])
+
         return "\n".join(html_out)
 
     gap_y = float(kwargs.get("gap_y", -1.0))
@@ -124,7 +131,7 @@ def to_html(
     if footer:
         html_out.append(f'  <div class="document-footer">\n    {footer}\n  </div>')
 
-    html_out.append("</body>")
-    html_out.append("</html>")
+    if not fragment:
+        html_out.extend(["</body>", "</html>"])
 
     return "\n".join(html_out)
