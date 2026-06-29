@@ -14,7 +14,7 @@
   </a>
 </p>
 
-**Dorsal Adapters** translates [validated](https://github.com/dorsalhub/open-validation-schemas) JSON records into various industry-standard formats.
+**Dorsal Adapters** translates [schema-validated](https://github.com/dorsalhub/open-validation-schemas) JSON records into a number of standard file formats.
 
 ## Supported Formats
 
@@ -36,10 +36,10 @@
 
 ### arXiv Metadata (`dorsal/arxiv`)
 
-* **`bib`**: **BibTeX (.bib)** — A standard bibliographic reference format.
-* **`csl-json`**: **CSL-JSON (.json)** — A standard bibliographic reference format.
-* **`ris`**: **RIS (.ris)** — A standard bibliographic reference format.
-* **`md`**: **RAG-Optimized Markdown** — Embeds standard YAML frontmatter (ID, DOI, Categories, Year) and markdown formatting for ingestion into PKMs or RAG pipelines.
+* **`bib`**: **BibTeX (.bib)** — Standard bibliographic reference format.
+* **`csl-json`**: **CSL-JSON (.json)** — Standard bibliographic reference format.
+* **`ris`**: **RIS (.ris)** — Standard bibliographic reference format.
+* **`md`**: **RAG-Optimized Markdown** — YAML frontmatter (ID, DOI, Categories, Year) and markdown formatting for ingestion into PKMs or RAG pipelines.
 
 
 ---
