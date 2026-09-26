@@ -16,6 +16,7 @@ import logging
 from typing import Any, cast
 
 from dorsal_adapters.common.constants import OpenSchemaName
+from jsonschema_rs import ValidationError as JsonSchemaValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -39,4 +40,13 @@ def validate_record(record: dict[str, Any], schema_id: OpenSchemaName | str, ver
         kwargs = {"version": version} if version else {}
         validator = get_open_schema_validator(cast(OpenSchemaName, schema_id), **kwargs)
 
-    validator.validate(record)
+    if not validator.is_valid(record):
+        raise JsonSchemaValidationError(
+            f"Record failed schema validation for '{schema_id}'.",
+            f"Record failed schema validation for '{schema_id}'.",
+            [],
+            [],
+            [],
+            "type",
+            "Instance omitted for memory safety.",
+        )
