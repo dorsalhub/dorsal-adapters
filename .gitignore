@@ -228,3 +228,6 @@ requirements.txt
 *.temp.bin
 coverage.xml
 dorsal.toml
+CLAUDE.md
+.claude/
+AUDIT.md

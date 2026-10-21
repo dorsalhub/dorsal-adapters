@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import pytest
 import subprocess
+from html.parser import HTMLParser
 
 from jsonschema_rs import ValidationError as JsonSchemaValidationError
 from hocr_tools_lib.tools.hocr_check import Checker
@@ -272,3 +274,70 @@ def test_from_hocr_orphaned_end_tags():
 
     assert len(record["blocks"]) == 1
     assert record["blocks"][0]["text"] == "Saved it!"
+
+
+class _AttributeCollector(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tags: list[str] = []
+        self.attr_names: set[str] = set()
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.tags.append(tag)
+        self.attr_names.update(name for name, _ in attrs)
+
+
+def test_to_hocr_attribute_keys_cannot_add_attributes():
+    """Block attribute keys stay inside a single data attribute name."""
+    record = {
+        "extraction_type": "mixed",
+        "blocks": [
+            {
+                "block_type": "text",
+                "text": "Hello",
+                "page_number": 1,
+                "attributes": {'x data-injected="1" y': "v", "a/b>c": "w"},
+            }
+        ],
+    }
+    result = to_hocr(record, validate=False)
+
+    collector = _AttributeCollector()
+    collector.feed(result)
+    collector.close()
+    assert "data-injected" not in collector.attr_names
+    assert "data-x_data-injected__1__y" in collector.attr_names
+    assert "data-a_b_c" in collector.attr_names
+
+
+def test_to_hocr_escapes_page_number():
+    """A page number is escaped in the page's id attribute."""
+    record = {
+        "extraction_type": "mixed",
+        "blocks": [{"block_type": "text", "text": "Hello", "page_number": '1" data-injected="1'}],
+    }
+    result = to_hocr(record, validate=False)
+
+    collector = _AttributeCollector()
+    collector.feed(result)
+    collector.close()
+    assert "data-injected" not in collector.attr_names
+    assert 'id="page_1&quot; data-injected=&quot;1"' in result
+
+
+def test_to_hocr_does_not_mutate_record():
+    """Exporting leaves the caller's record unchanged, so it can be exported again."""
+    record = {
+        "extraction_type": "mixed",
+        "blocks": [
+            {"block_type": "text", "text": "Hello", "attributes": {"hocr_class": "ocrx_word", "font": "Arial"}},
+            {"block_type": "text", "text": "Paragraph", "attributes": {"hocr_class": "ocr_par"}},
+        ],
+    }
+    original = copy.deepcopy(record)
+
+    first = to_hocr(record, validate=False)
+
+    assert record == original
+    assert to_hocr(record, validate=False) == first
+    assert '<span class="ocrx_word" data-font="Arial">Hello</span>' in first
