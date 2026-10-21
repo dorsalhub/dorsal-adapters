@@ -14,10 +14,13 @@
 
 import html
 import json
+import re
 from typing import Any
 from html.parser import HTMLParser
 
 from dorsal_adapters.common.validation import validate_record
+
+_UNSAFE_ATTR_NAME_CHARS = re.compile(r"[\s\"'<>/=&\x00-\x1f\x7f]")
 
 
 def _get_page_dimension(dim_data: Any, page_num: int, default: int = 1000) -> int:
@@ -92,10 +95,12 @@ def to_hocr(
         width = _get_page_dimension(record.get("page_width"), page_num, default=1000)
         height = _get_page_dimension(record.get("page_height"), page_num, default=1000)
 
-        output.append(f'  <div class="ocr_page" id="page_{page_num}" title="bbox 0 0 {width} {height}">')
+        output.append(
+            f'  <div class="ocr_page" id="page_{html.escape(str(page_num))}" title="bbox 0 0 {width} {height}">'
+        )
 
         for block in pages[page_num]:
-            attrs = block.get("attributes", {})
+            attrs = dict(block.get("attributes", {}))
             hocr_class = attrs.pop("hocr_class", "ocr_line")
 
             title_parts = []
@@ -113,7 +118,7 @@ def to_hocr(
             for k, v in attrs.items():
                 if isinstance(v, (dict, list)):
                     v = json.dumps(v)
-                data_attrs.append(f'data-{html.escape(str(k))}="{html.escape(str(v))}"')
+                data_attrs.append(f'data-{_UNSAFE_ATTR_NAME_CHARS.sub("_", str(k))}="{html.escape(str(v))}"')
 
             if "polygon" in block:
                 data_attrs.append(f'data-polygon="{html.escape(json.dumps(block["polygon"]))}"')

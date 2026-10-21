@@ -39,7 +39,7 @@ def render_tree(node: dict[str, Any]) -> str:
         b_type = block.get("block_type", "text")
         if text:
             return f'<p class="block-text">{html.escape(text)}</p>'
-        return f'<div class="figure-placeholder">[{b_type}]</div>'
+        return f'<div class="figure-placeholder">[{html.escape(str(b_type))}]</div>'
 
     if ntype == "cluster":
         return "".join(render_tree(c) for c in node.get("children", []))
